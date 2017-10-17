@@ -14,7 +14,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @Component
 @Configuration
 @EnableSwagger2
-public class Swagger2Config extends WebMvcConfigurerAdapter{
+public class Swagger2Config{
         @Bean
         public Docket createRestApi() {
             return new Docket(DocumentationType.SWAGGER_2)
