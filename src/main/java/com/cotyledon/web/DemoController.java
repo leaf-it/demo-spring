@@ -1,7 +1,9 @@
 package com.cotyledon.web;
 
 import com.cotyledon.vo.DemoVO;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,8 +24,19 @@ public class DemoController {
 //    }
     @RequestMapping(value="/string")
     @ApiOperation(value="测试接口", notes="测试接口详细描述")
-    public String string(){
-        return "hello,everything is ok!";
+    @HystrixCommand(fallbackMethod = "stringHystrix")
+    public String string(@RequestBody String flag) {
+        if("t".equals(flag)) {
+            return "hello,everything is ok!";
+        } else if("f".equals(flag)){
+            throw new RuntimeException("ha, your input parameter is wrong!");
+        } else {
+            return null;
+        }
+    }
+
+    public String stringHystrix(String flag){
+        return  "hi,I am sorry ,something is wrong here!please ,wait some seconds!";
     }
 //    @RequestMapping(value = "/object")
 //    public DemoVO getAuthInf(){
