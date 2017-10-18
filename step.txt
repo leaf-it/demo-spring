@@ -1,0 +1,92 @@
+1.创建Demo项目：
+    1.创建Spring Boot 简单响应请求服务
+        1.在项目中pom.xml添加
+          <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+          </dependency>
+        2.创建boot启动程序，关键字@SpringBootApplication ，其实现main方法，做为进程入口SpringApplication.run(DemoApplication.class, args);
+        3.创建controller，关键字@RestController ，注册为contraller，@RequestMapping(value="/demo")为路径映射。
+    2.集成swagger
+        1.在项目pom.xml中添加：
+            <!--swagger集成-->
+            <!--访问地址：
+            http://localhost:5000/v2/api-docs 查看api
+            http://127.0.0.1:5000/swagger-ui.html 查看界面
+            -->
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>2.7.0</version>
+            </dependency>
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger-ui</artifactId>
+                <version>2.7.0</version>
+            </dependency>
+        2.添加配置类
+            @Component
+            @Configuration
+            @EnableSwagger2
+            public class Swagger2Config{
+                    @Bean
+                    public Docket createRestApi() {
+                        return new Docket(DocumentationType.SWAGGER_2)
+                                .select()
+                                .apis(RequestHandlerSelectors.any())
+                                .paths(PathSelectors.any())
+                                .build();
+                    }
+            }
+    3.集成eureka项目
+        1.服务端从网上下载eureka.war，放在tomcat下，启动tomcat后，可通过http:ip:port/eureka进行访问
+        2.客户端在项目中加入pom.xml中加入
+             <!--添加eureka注册服务-->
+                    <dependency>
+                        <groupId>org.springframework.cloud</groupId>
+                        <!--如果是服务端 则是下列配置-->
+                        <!--<artifactId>spring-cloud-starter-eureka-server</artifactId>-->
+                        <!--如果是客户端 则是下列-->
+                        <artifactId>spring-cloud-starter-eureka</artifactId>
+                        <version>1.3.1.RELEASE</version>
+                    </dependency>
+        3.在启动boot中添加@EnableEurekaClient启动eureka客户注册
+        4.属性文件中需要添加以下内容
+          #应用名称，若无此项，界面应用上则显示unknown
+          spring.application.name=demo
+          #添加eureka 即将服务从网上下载下来直接放在tomcat中启动
+          # 如果写成http://localhost:8080/eureka注册时失败 问题遗留，恐怕是版本或者设置问题 date 2017-10-17
+          # registered-replicas：http://localhost:8080/eureka/v2/
+          eureka.client.serviceUrl.defaultZone=http://localhost:8080/eureka/v2/
+          # ${server.port}为该服务的端口号 设置eureka直接跳转到指定页面，如果不设置此项，其出现info，或者是index，不友好
+          eureka.instance.status-page-url=http://localhost:${server.port}/swagger-ui.html
+    4.集成Hystrix项目
+        1.项目pom.xml添加
+            <!--熔断器  -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-hystrix</artifactId>
+                <version>1.3.1.RELEASE</version>
+            </dependency>
+        2.在boot启动器中添加@EnableHystrix注解，以启动hystrix
+        3.在controller中方法中添加@HystrixCommand(fallbackMethod = "方法名") 其中方法名中方法需要和原方法参数一致
+    5.部署hystrix-dashboard
+          下载standalone-hystrix-dashboard-{version}-all.jar
+          启动hystrix-dashboard:   java -jar -DserverPort=7979 -DbindAddress=localhost standalone-hystrix-dashboard-1.5.3-all.jar
+          打开http://localhost:端口/hystrix-dashboard/ 即可} 启动成功，但面板还有没有反应，没有找到对的途径使用
+    5.集成Hystrix Dashboard
+        1.项目pom.xml添加
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-actuator</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-hystrix-dashboard</artifactId>
+            </dependency>
+        2.boot启动类中添加@EnableHystrixDashboard
+        3.启动查看EnableHystrixDashboard地址：http://ip:端口/hystrix，其在stream处添加http://ip:端口/hystrix.steam,点击monitor即可查看。
+
+
+
+
